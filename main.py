@@ -212,7 +212,7 @@ class Game:
             strings = [[int(num) if num != '_' else 0 for num in sublist] for sublist in resultado.data]
             self.tiles_grid = strings
             self.draw_tiles()
-            time.sleep(0.1)            
+            time.sleep(0.01)            
 
     def draw_grid(self):
         # Desenha a grade do jogo na tela
@@ -229,7 +229,7 @@ class Game:
         for button in self.buttons_list:
             button.draw(self.screen)
         UIElement(550, 35, "%.3f" % self.elapsed_time).draw(self.screen)
-        UIElement(430, 400, "High Score - %.3f" % (self.high_score if self.high_score > 0 else 0)).draw(self.screen)
+        UIElement(430, 400, "Recorde - %.3f" % (self.high_score if self.high_score > 0 else 0)).draw(self.screen)
         if(self.movements == 1000):
             UIElement(100, 400, "Erro").draw(self.screen)  # Exibe a quantidade de movimentos
         elif(self.movements != 1000):
