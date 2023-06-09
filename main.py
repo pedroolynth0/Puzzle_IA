@@ -6,6 +6,7 @@ from settings import *
 from resolver import *
 import threading
 from buscaGulosa import *
+from minimax import *
 class Game:
     def __init__(self):
         pygame.init()
@@ -16,6 +17,7 @@ class Game:
         self.start_shuffle = False
         self.start_A = False
         self.start_Gulosa = False
+        self.start_Minimax = False
         self.previous_choice = ""
         self.start_game = False
         self.start_timer = False
@@ -98,7 +100,8 @@ class Game:
         self.buttons_list = []
         self.buttons_list.append(Button(500, 100, 200, 50, "A*", WHITE, BLACK))
         self.buttons_list.append(Button(500, 170, 200, 50, "Busca Gulosa", WHITE, BLACK))
-        self.buttons_list.append(Button(500, 240, 200, 50, "Reset", WHITE, BLACK))
+        self.buttons_list.append(Button(500, 240, 200, 50, "Minimax", WHITE, BLACK))
+        self.buttons_list.append(Button(500, 310, 200, 50, "Reset", WHITE, BLACK))
         self.draw_tiles()
 
     def run(self):
@@ -141,7 +144,11 @@ class Game:
                 elif self.start_Gulosa:
                     thread = threading.Thread(target=self.BuscaGulosa)
                     thread.start()
-                    self.start_Gulosa = False                
+                    self.start_Gulosa = False     
+                elif self.start_Minimax:
+                    thread = threading.Thread(target=self.BuscaMinimax)
+                    thread.start()
+                    self.start_Minimax = False  
 
         self.all_sprites.update()
 
@@ -174,7 +181,24 @@ class Game:
             strings = [[int(num) if num != '_' else 0 for num in sublist] for sublist in resultado.data]
             self.tiles_grid = strings
             self.draw_tiles()
-            time.sleep(0.1)            
+            time.sleep(0.1)    
+
+
+    def BuscaMinimax(self):
+        # Método para resolver o jogo
+        time.sleep(1)
+        strings = [[str(num) if num != 0 else '_' for num in sublist] for sublist in self.tiles_grid]
+        puz = Minimax(3, strings)
+        puz.process(50)
+        self.movements = puz.movimentos
+        UIElement(100, 400, "Movimentos: %d" % 10).draw(self.screen)  # Exibe a quantidade de movimentos
+        
+
+        for resultado in puz.closed:
+            strings = [[int(num) if num != '_' else 0 for num in sublist] for sublist in resultado.data]
+            self.tiles_grid = strings
+            self.draw_tiles()
+            time.sleep(0.1)           
 
     def draw_grid(self):
         # Desenha a grade do jogo na tela
@@ -234,6 +258,13 @@ class Game:
                             self.shuffle_time = 0
                             self.start_shuffle = True
                             self.start_Gulosa = True
+
+                        if button.text == "Minimax":
+                            self.shuffle_time = 0
+                            self.start_shuffle = True
+                            self.start_Minimax = True
+
+                        
 
                         if button.text == "Reset":
                             self.new()

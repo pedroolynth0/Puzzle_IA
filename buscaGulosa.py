@@ -50,7 +50,8 @@ class BuscaGulosa:
         for i in range(self.n):
             for j in range(self.n):
                 if start[i][j] != goal[i][j] and start[i][j] != '_':
-                    temp += 1
+                    x, y = divmod(int(start[i][j]) - 1, self.n)
+                    temp += abs(i - x) + abs(j - y)
         return temp
 
     def process(self):
@@ -68,7 +69,7 @@ class BuscaGulosa:
             if not self.open:
                 break
             if self.movimentos == 400:
-                print("Nao foi possivel resolver")
+                print("Não foi possível resolver")
                 self.closed = []
                 break
 
