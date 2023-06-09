@@ -3,10 +3,10 @@ import random
 import time
 from sprite import *
 from settings import *
-from resolver import *
+from A import *
 import threading
 from buscaGulosa import *
-from minimax import *
+from buscaLargura import *
 class Game:
     def __init__(self):
         pygame.init()
@@ -17,7 +17,7 @@ class Game:
         self.start_shuffle = False
         self.start_A = False
         self.start_Gulosa = False
-        self.start_Minimax = False
+        self.start_Largura = False
         self.previous_choice = ""
         self.start_game = False
         self.start_timer = False
@@ -100,7 +100,7 @@ class Game:
         self.buttons_list = []
         self.buttons_list.append(Button(500, 100, 200, 50, "A*", WHITE, BLACK))
         self.buttons_list.append(Button(500, 170, 200, 50, "Busca Gulosa", WHITE, BLACK))
-        self.buttons_list.append(Button(500, 240, 200, 50, "Minimax", WHITE, BLACK))
+        self.buttons_list.append(Button(500, 240, 200, 50, "Busca Largura", WHITE, BLACK))
         self.buttons_list.append(Button(500, 310, 200, 50, "Reset", WHITE, BLACK))
         self.draw_tiles()
 
@@ -133,7 +133,7 @@ class Game:
             self.shuffle()
             self.draw_tiles()
             self.shuffle_time += 1
-            if self.shuffle_time > 5:
+            if self.shuffle_time == 6:
                 self.start_shuffle = False
                 self.start_game = True
                 self.start_timer = True
@@ -145,10 +145,10 @@ class Game:
                     thread = threading.Thread(target=self.BuscaGulosa)
                     thread.start()
                     self.start_Gulosa = False     
-                elif self.start_Minimax:
-                    thread = threading.Thread(target=self.BuscaMinimax)
+                elif self.start_Largura:
+                    thread = threading.Thread(target=self.BuscaLargura)
                     thread.start()
-                    self.start_Minimax = False  
+                    self.start_Largura = False  
 
         self.all_sprites.update()
 
@@ -159,7 +159,12 @@ class Game:
         strings = [[str(num) if num != 0 else '_' for num in sublist] for sublist in self.tiles_grid]
         puz = A(3, strings)
         puz.process()
+        
         self.movements = puz.movimentos
+
+        if(self.movements == 400):
+            self.movements = 1000
+            self.new()
         
         for resultado in puz.closed:
             strings = [[int(num) if num != '_' else 0 for num in sublist] for sublist in resultado.data]
@@ -173,8 +178,13 @@ class Game:
         strings = [[str(num) if num != 0 else '_' for num in sublist] for sublist in self.tiles_grid]
         puz = BuscaGulosa(3, strings)
         puz.process()
+        
         self.movements = puz.movimentos
-        UIElement(100, 400, "Movimentos: %d" % 10).draw(self.screen)  # Exibe a quantidade de movimentos
+
+        if(self.movements == 400):
+            self.movements = 1000
+            self.new()
+
         
 
         for resultado in puz.closed:
@@ -184,21 +194,25 @@ class Game:
             time.sleep(0.1)    
 
 
-    def BuscaMinimax(self):
+    def BuscaLargura(self):
         # Método para resolver o jogo
         time.sleep(1)
         strings = [[str(num) if num != 0 else '_' for num in sublist] for sublist in self.tiles_grid]
-        puz = Minimax(3, strings)
-        puz.process(50)
+        puz = BuscaEmLargura(3, strings)
+        puz.process()
+        
         self.movements = puz.movimentos
-        UIElement(100, 400, "Movimentos: %d" % 10).draw(self.screen)  # Exibe a quantidade de movimentos
+
+        if(self.movements == 1000):
+            self.new()
+
         
 
         for resultado in puz.closed:
             strings = [[int(num) if num != '_' else 0 for num in sublist] for sublist in resultado.data]
             self.tiles_grid = strings
             self.draw_tiles()
-            time.sleep(0.1)           
+            time.sleep(0.1)            
 
     def draw_grid(self):
         # Desenha a grade do jogo na tela
@@ -216,7 +230,10 @@ class Game:
             button.draw(self.screen)
         UIElement(550, 35, "%.3f" % self.elapsed_time).draw(self.screen)
         UIElement(430, 400, "High Score - %.3f" % (self.high_score if self.high_score > 0 else 0)).draw(self.screen)
-        UIElement(100, 400, "Movimentos: %d" % self.movements).draw(self.screen)  # Exibe a quantidade de movimentos
+        if(self.movements == 1000):
+            UIElement(100, 400, "Erro").draw(self.screen)  # Exibe a quantidade de movimentos
+        elif(self.movements != 1000):
+            UIElement(100, 400, "Movimentos: %d" % self.movements).draw(self.screen)  # Exibe a quantidade de movimentos
         pygame.display.flip()
 
     def events(self):
@@ -259,10 +276,10 @@ class Game:
                             self.start_shuffle = True
                             self.start_Gulosa = True
 
-                        if button.text == "Minimax":
+                        if button.text == "Busca Largura":
                             self.shuffle_time = 0
                             self.start_shuffle = True
-                            self.start_Minimax = True
+                            self.start_Largura = True
 
                         
 
